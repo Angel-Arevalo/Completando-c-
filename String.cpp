@@ -192,6 +192,11 @@ class String {
             this->setString(args);
         }
 
+        //
+        char& operator[] (int index) {
+            index = index%this->length;
+            return this->cString[index - 1];
+        }
         // print a object is equal to print a string
 		friend std::ostream& operator<<(std::ostream& os, const String& str) {
             os << str.cString;

@@ -11,6 +11,6 @@ int main()
     std::cout << x << "\n\n";
     std::cout << y.getlength() << "\n\n";
     std::cout << y << "\n\n";
-    std::cout << (x + y)<< "\n\n";
+    std::cout << x[2]<< "\n\n";
     return 0;
 }
