@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 
 class String {
 
@@ -101,6 +102,13 @@ class String {
             cString[length] = '\0';
 		}
 
+        String(const char ch) {
+            this->length = 1;
+            this->cString = new char[2];
+
+            cString[0] = ch;
+            cString[1] = '\0';
+        }
 		// a getter to use in the methods
 		int getlength() {
             return this->length;
@@ -153,6 +161,11 @@ class String {
             this->concatenateSum(str);
             return *this;
         }
+        String& operator+= (char args) {
+            String str(args);
+            this->concatenateSum(str);
+            return *this;
+        }
         // override the operator +
         String operator+ (String args) {
             return this->concatenateSum(args);
@@ -162,6 +175,19 @@ class String {
             return this->concatenateSum(str);
         }
 
+        friend String operator+(const char* args, String m) {
+            String argsObject(args);
+            return (argsObject + m);
+        }
+        friend String operator+(char chr, String args) {
+            String ch(chr);
+            return ch + args;
+        }
+        friend String operator+(char chr, const char* args) {
+            String ch(chr);
+            String arg(args);
+            return ch + arg;
+        }
         // override the operator == and ===
         bool operator== (String args) {
             return this->compareStrings(args);
@@ -192,10 +218,31 @@ class String {
             this->setString(args);
         }
 
-        //
+        // the method subString
+        String operator() (int firstIndex, int secondIndex) {
+            if (this->length < secondIndex || firstIndex < 0)
+                throw std::runtime_error("index out of the range");
+            if (firstIndex == secondIndex || secondIndex < firstIndex)
+                throw std::runtime_error("second index in bat range");
+            char* subString = new char[secondIndex - firstIndex + 1];
+            int k = 0;
+
+            for (int i = firstIndex; i < secondIndex; i++, k++) {
+                subString[k] = this->cString[i];
+            }
+            subString[secondIndex - firstIndex] = '\0';
+            String args(subString);
+            return args;
+        }
+
+        String operator() (int firstIndex) {
+            return (*this)(firstIndex, this->length);
+        }
+
+        // the method to get the chars
         char& operator[] (int index) {
-            index = index%this->length;
-            return this->cString[index - 1];
+            index = index%(this->length);
+            return this->cString[index];
         }
         // print a object is equal to print a string
 		friend std::ostream& operator<<(std::ostream& os, const String& str) {
