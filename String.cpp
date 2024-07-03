@@ -16,23 +16,7 @@ class String {
 			return i;
 		};
 
-		void concatenate(String args) {
-		    int length = this->length + args.getlength() + 1;
-		    const char* argsString = args.getString();
-		    char* StringCont = new char[length];
-		    int i, k = 0;
-
-		    for (i = 0; i < this->length; ++i) {
-                StringCont[i] = this->cString[i];
-		    }for (int j = 0; j < args.getlength(); ++j, ++i) {
-                StringCont[i] = argsString[j];
-            }
-		    StringCont[length-1] = '\0';
-            String y(StringCont);
-		    setString(y);
-		}
-
-		String concatenateSum(String args) {
+		String concatenate(String args) {
 		    int length = this->length + args.getlength() + 1;
 		    const char* argsString = args.getString();
 		    char* StringCont = new char[length];
@@ -67,11 +51,12 @@ class String {
             this->setString(argsObject);
         }
 
-        bool compareStrings(String args) {
-            if (this->length == args.getlength()) {
-                const char* argsString = args.getString();
-                for (int i = 0; i < this->length; i++) {
-                    if (this->cString[i] != argsString[i])
+        static bool compareStrings(String argsS, String args) {
+            if (argsS.getlength() == args.getlength()) {
+                char* argsString = args.getString();
+                char* cString = argsS.getString();
+                for (int i = 0; i < argsS.getlength(); i++) {
+                    if (cString[i] != argsString[i])
                         return false;
                 }
             }else return false;
@@ -152,27 +137,28 @@ class String {
             return Upper;
 		}
         // override the method of the operator +=
-        String& operator+= (String args) {
-            this->concatenate(args);
-            return *this;
+        void operator+= (String args) {
+            this->setString(this->concatenate(args));
         }
-        String& operator+= (const char* args) {
+        void operator+= (const char* args) {
             String str(args);
-            this->concatenateSum(str);
-            return *this;
+            this->setString(this->concatenate(str));
         }
-        String& operator+= (char args) {
+        void operator+= (char* args) {
             String str(args);
-            this->concatenateSum(str);
-            return *this;
+            this->setString(this->concatenate(str));
+        }
+        void operator+= (char args) {
+            String str(args);
+            this->setString(this->concatenate(str));
         }
         // override the operator +
         String operator+ (String args) {
-            return this->concatenateSum(args);
+            return this->concatenate(args);
         }
         String operator+ (const char* args) {
             String str(args);
-            return this->concatenateSum(str);
+            return this->concatenate(str);
         }
 
         friend String operator+(const char* args, String m) {
@@ -183,27 +169,65 @@ class String {
             String ch(chr);
             return ch + args;
         }
-        friend String operator+(char chr, const char* args) {
+        /*friend String operator+(char chr, const char* args) {
             String ch(chr);
             String arg(args);
             return ch + arg;
+        }*/
+        // override the operator ==
+        friend bool operator== (String argsS, String args) {
+            return compareStrings(argsS, args);
         }
-        // override the operator == and ===
-        bool operator== (String args) {
-            return this->compareStrings(args);
-        }
-        bool operator== (const char* args) {
+        friend bool operator== (String argsS, const char* args) {
             String argsObject(args);
-            return this->compareStrings(argsObject);
+            return compareStrings(argsS, argsObject);
+        }
+        friend bool operator== (const char* args, String argsS) {
+            String argsObject(args);
+            return compareStrings(argsS, argsObject);
+        }
+        friend bool operator== (String argsS, char* args) {
+            String argsObject(args);
+            return compareStrings(argsS, argsObject);
+        }
+        friend bool operator== (char* args, String argsS) {
+            String argsObject(args);
+            return compareStrings(argsS, argsObject);
         }
         // this is the equalIgnoreCase
-        bool operator/= (String& args) {
-            String x = this->toLowerCase();
+        friend bool operator/= (String argsS, String args) {
+            String x = argsS.toLowerCase();
             String y = args.toLowerCase();
             return (x == y);
         }
-        bool operator/= (const char* args) {
-            String x = this->toLowerCase();
+        friend bool operator/= (String argsS, const char* args) {
+            String x = argsS.toLowerCase();
+            String y(args);
+            return (x == y.toLowerCase());
+        }
+        friend bool operator/= (const char* args, String argsS) {
+            String x = argsS.toLowerCase();
+            String y(args);
+            return (x == y.toLowerCase());
+        }
+        friend bool operator/= (String argsS, char* args) {
+            String x = argsS.toLowerCase();
+            String y(args);
+            return (x == y.toLowerCase());
+        }
+        friend bool operator/= (char* args, String argsS) {
+            String x = argsS.toLowerCase();
+            String y(args);
+            return (x == y.toLowerCase());
+        }
+        // the ignore case to the char
+        friend bool operator/= (char args, String argsS) {
+            String x = argsS.toLowerCase();
+            String y(args);
+            return (x == y.toLowerCase());
+        }
+        friend bool operator/= (String argsS, char args) {
+            String x = argsS.toLowerCase();
             String y(args);
             return (x == y.toLowerCase());
         }

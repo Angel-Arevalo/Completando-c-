@@ -5,9 +5,8 @@ int main()
 {
     String x = "HELLO";
     String y("hello");
-    char l;
-    std::cin >> l;
-    x = '7';
-    std::cout <<"16" + x + 't'<< std::endl;
+    x += y;
+    x += " s;";
+    std::cout <<( x + ' '+ x)<< std::endl;
     return 0;
 }
