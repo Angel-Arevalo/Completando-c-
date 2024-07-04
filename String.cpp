@@ -16,19 +16,19 @@ class String {
 			return i;
 		};
 
-		String concatenate(String args) {
-		    int length = this->length + args.getlength() + 1;
-		    const char* argsString = args.getString();
+		String concatenate(const String& args) {
+		    int length = this->length + args.length + 1;
 		    char* StringCont = new char[length];
 		    int i, k = 0;
 
 		    for (i = 0; i < this->length; ++i) {
                 StringCont[i] = this->cString[i];
-		    }for (int j = 0; j < args.getlength(); ++j, ++i) {
-                StringCont[i] = argsString[j];
+		    }for (int j = 0; j < args.length; ++j, ++i) {
+                StringCont[i] = args.cString[j];
             }
 		    StringCont[length - 1] = '\0';
             String y(StringCont);
+            delete[] StringCont;
 		    return y;
 		}
 
@@ -44,6 +44,7 @@ class String {
                 this->cString[i] = argsString[i];
             }
             this->cString[this->length] = '\0';
+            delete[] argsString;
         }
 
         void setString(const char* args) {
@@ -51,18 +52,46 @@ class String {
             this->setString(argsObject);
         }
 
-        static bool compareStrings(String argsS, String args) {
-            if (argsS.getlength() == args.getlength()) {
-                char* argsString = args.getString();
-                char* cString = argsS.getString();
-                for (int i = 0; i < argsS.getlength(); i++) {
-                    if (cString[i] != argsString[i])
+        static bool compareStrings(const String& argsS, const String& args){
+            if (argsS.length == args.length) {
+                for (int i = 0; i < argsS.length; i++) {
+                    if (argsS.cString[i] != args.cString[i]) {
                         return false;
+                    }
                 }
-            }else return false;
+            }else {
+                return false;
+            }
             return true;
         }
 
+        String subString(int firstIndex, int secondIndex) const {
+            if (this->length < secondIndex || firstIndex < 0)
+                throw std::runtime_error("index out of the range");
+            if (firstIndex == secondIndex || secondIndex < firstIndex)
+                throw std::runtime_error("second index in bat range");
+            char* subString = new char[secondIndex - firstIndex + 1];
+            int k = 0;
+
+            for (int i = firstIndex; i < secondIndex; i++, k++) {
+                subString[k] = this->cString[i];
+            }
+            subString[secondIndex - firstIndex] = '\0';
+            String args(subString);
+            return args;
+        }
+
+        int indexOf(const String& args) const {
+            if (this->length >= args.length) {
+                for (int i = 0; i < this->length - args.length; i++) {
+                    String y = this->subString(i, i + args.length);
+                    if (y == args) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
 	public:
 	    // the constructor of the class
 		String(const char* string) {
@@ -87,7 +116,18 @@ class String {
             cString[length] = '\0';
 		}
 
-        String(const char ch) {
+        String(const String& string) {
+            this->length = string.length;
+            this->cString = new char[this->length + 1];
+
+            for (int i = 0; i < this->length; i++) {
+                this->cString[i] = string.cString[i];
+            }
+
+            this->cString[this->length] = '\0';
+        }
+
+        String(char ch) {
             this->length = 1;
             this->cString = new char[2];
 
@@ -142,15 +182,15 @@ class String {
         }
         void operator+= (const char* args) {
             String str(args);
-            this->setString(this->concatenate(str));
+            *this += str;
         }
         void operator+= (char* args) {
             String str(args);
-            this->setString(this->concatenate(str));
+            *this += str;
         }
         void operator+= (char args) {
             String str(args);
-            this->setString(this->concatenate(str));
+            *this += str;
         }
         // override the operator +
         String operator+ (String args) {
@@ -158,41 +198,47 @@ class String {
         }
         String operator+ (const char* args) {
             String str(args);
-            return this->concatenate(str);
+            return *this + str;
         }
-
+        String operator+ (char* args) {
+            String str(args);
+            return *this + str;
+        }
+        String operator+ (char args) {
+            String str(args);
+            return *this + str;
+        }
         friend String operator+(const char* args, String m) {
             String argsObject(args);
             return (argsObject + m);
+        }
+        friend String operator+(char* chr, String args) {
+            String ch(chr);
+            return ch + args;
         }
         friend String operator+(char chr, String args) {
             String ch(chr);
             return ch + args;
         }
-        /*friend String operator+(char chr, const char* args) {
-            String ch(chr);
-            String arg(args);
-            return ch + arg;
-        }*/
         // override the operator ==
         friend bool operator== (String argsS, String args) {
-            return compareStrings(argsS, args);
+            return String::compareStrings(argsS, args);
         }
         friend bool operator== (String argsS, const char* args) {
             String argsObject(args);
-            return compareStrings(argsS, argsObject);
+            return argsS == argsObject;
         }
         friend bool operator== (const char* args, String argsS) {
             String argsObject(args);
-            return compareStrings(argsS, argsObject);
+            return argsS == argsObject;
         }
         friend bool operator== (String argsS, char* args) {
             String argsObject(args);
-            return compareStrings(argsS, argsObject);
+            return argsS == argsObject;
         }
         friend bool operator== (char* args, String argsS) {
             String argsObject(args);
-            return compareStrings(argsS, argsObject);
+            return argsS == argsObject;
         }
         // this is the equalIgnoreCase
         friend bool operator/= (String argsS, String args) {
@@ -201,42 +247,63 @@ class String {
             return (x == y);
         }
         friend bool operator/= (String argsS, const char* args) {
-            String x = argsS.toLowerCase();
             String y(args);
-            return (x == y.toLowerCase());
+            return (argsS /= y);
         }
         friend bool operator/= (const char* args, String argsS) {
-            String x = argsS.toLowerCase();
             String y(args);
-            return (x == y.toLowerCase());
+            return (argsS /= y);
         }
         friend bool operator/= (String argsS, char* args) {
-            String x = argsS.toLowerCase();
             String y(args);
-            return (x == y.toLowerCase());
+            return (argsS /= y);
         }
         friend bool operator/= (char* args, String argsS) {
-            String x = argsS.toLowerCase();
             String y(args);
-            return (x == y.toLowerCase());
+            return (argsS /= y);
         }
         // the ignore case to the char
         friend bool operator/= (char args, String argsS) {
-            String x = argsS.toLowerCase();
             String y(args);
-            return (x == y.toLowerCase());
+            return (argsS /= y);
         }
         friend bool operator/= (String argsS, char args) {
-            String x = argsS.toLowerCase();
             String y(args);
-            return (x == y.toLowerCase());
+            return (argsS /= y);
+        }
+        // override the operator !=
+        friend bool operator!=(String x, String y) {
+            return !(x == y);
+        }
+        friend bool operator!=(String x, const char* y) {
+            String args(y);
+            return (x != args);
+        }
+        friend bool operator!=(const char* y, String x) {
+            String args(y);
+            return (x != args);
+        }
+        friend bool operator!=(String x, char* y) {
+            String args(y);
+            return (x != args);
+        }
+        friend bool operator!=(char* y, String x) {
+            String args(y);
+            return (x != args);
+        }
+        friend bool operator!=(String x, char y) {
+            String args(y);
+            return (x != args);
+        }
+        friend bool operator!=(char y, String x) {
+            String args(y);
+            return (x != args);
         }
         // override the operator =
-        String& operator=(String other) {
-            if (!(this == &other)) {
+        void operator=(String other) {
+            if (this != &other) {
                 this->setString(other.cString);
             }
-            return *this;
         }
         void operator= (const char* args) {
             this->setString(args);
@@ -244,23 +311,28 @@ class String {
 
         // the method subString
         String operator() (int firstIndex, int secondIndex) {
-            if (this->length < secondIndex || firstIndex < 0)
-                throw std::runtime_error("index out of the range");
-            if (firstIndex == secondIndex || secondIndex < firstIndex)
-                throw std::runtime_error("second index in bat range");
-            char* subString = new char[secondIndex - firstIndex + 1];
-            int k = 0;
-
-            for (int i = firstIndex; i < secondIndex; i++, k++) {
-                subString[k] = this->cString[i];
-            }
-            subString[secondIndex - firstIndex] = '\0';
-            String args(subString);
-            return args;
+            return this->subString(firstIndex, secondIndex);
         }
 
         String operator() (int firstIndex) {
-            return (*this)(firstIndex, this->length);
+            return this->subString(firstIndex, this->length);
+        }
+
+        int operator[] (const String& w) const {
+            return this->indexOf(w);
+        }
+
+        int operator[] (const char* x) {
+            String w(x);
+            return this->indexOf(w);
+        }
+        int operator[] (char* x) {
+            String w(x);
+            return this->indexOf(w);
+        }
+        int operator[] (char x) {
+            String w(x);
+            return this->indexOf(w);
         }
 
         // the method to get the chars
@@ -274,3 +346,33 @@ class String {
             return os;
         }
 };
+
+String toLowerCase(const char* args) {
+    String x(args);
+    return x.toLowerCase();
+}
+
+String toLowerCase(char* args) {
+    String x(args);
+    return x.toLowerCase();
+}
+
+String toLowerCase(char args) {
+    String x(args);
+    return x.toLowerCase();
+}
+
+String toUpperCase(const char* args) {
+    String x(args);
+    return x.toUpperCase();
+}
+
+String toUpperCase(char* args) {
+    String x(args);
+    return x.toUpperCase();
+}
+
+String toUpperCase(char args) {
+    String x(args);
+    return x.toUpperCase();
+}

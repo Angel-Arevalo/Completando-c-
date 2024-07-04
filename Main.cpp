@@ -3,10 +3,10 @@
 
 int main()
 {
-    String x = "HELLO";
-    String y("hello");
-    x += y;
-    x += " s;";
-    std::cout <<( x + ' '+ x)<< std::endl;
+    String x = toLowerCase("HELLO");
+    String y(x);
+    String m = x + y + " my name is Angel ";
+    m += 'w';
+    std::cout <<(m.toUpperCase())<< std::endl;
     return 0;
 }
