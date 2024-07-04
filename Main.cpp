@@ -1,12 +1,11 @@
 #include <iostream>
 #include "String.cpp"
+#include "VectorRn.cpp"
 
 int main()
 {
-    String x = toLowerCase("HELLO");
-    String y(x);
-    String m = x + y + " my name is Angel ";
-    m += 'w';
-    std::cout <<(m.toUpperCase())<< std::endl;
+    VectorRn<int> v(4, 1, 2, 4, 5);
+    VectorRn<double> w(5, 4.3, 1.928, 12.019271, 3.141516, 2.7115);
+    std::cout << w << " " << v;
     return 0;
 }

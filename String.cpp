@@ -5,7 +5,7 @@ class String {
 
 	private:
 		char* cString;
-		int length;
+		int length = 0;
 
 		//this method return the length of the string
 		static int lenString(const char* cString){
