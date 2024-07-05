@@ -6,6 +6,6 @@ int main()
 {
     VectorRn<int> v(3, 1, 0, 0);
     VectorRn<int> w(3, 0, 1, 0);
-    std::cout << (w % v);
+    std::cout << (v % w);
     return 0;
 }

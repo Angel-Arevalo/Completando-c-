@@ -129,7 +129,7 @@ class VectorRn  {
                 VectorRn i(3, 1, 0, 0);
                 VectorRn j(3, 0, 1, 0);
                 VectorRn z(3, 0, 0, 1);
-                return i*(v.string[1]*w.string[2] - v.string[2]*w.string[1]) + -1*j*(v.string[0]*w.string[2] - v.string[2]*w.string[0]) + z*(v.string[0]*w.string[1] - v.string[1]*w.string[0]);
+                return i*(v.vector[1]*w.vector[2] - v.vector[2]*w.vector[1]) + -1*j*(v.vector[0]*w.vector[2] - v.vector[2]*w.vector[0]) + z*(v.vector[0]*w.vector[1] - v.vector[1]*w.vector[0]);
             }else {
                 std::cout<< "Not match dimensions";
                 std::exit(1);
