@@ -1,57 +1,55 @@
-#include <cstdarg>
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
 
-template <typename Type>
 class VectorRn  {
     private:
         int dimension = 0;
-        Type* vector;
+        double* vector;
+        bool start = false;
 
     public:
-        VectorRn(int args, ...) {
-            static_assert(std::is_same<Type, int>::value || std::is_same<Type, double>::value,
-                      "Unsupported type: only use int or double");
-            if(args <= 0) {
-                throw std::out_of_range("index out of the range");
-            }
+        VectorRn() = default;
 
-            this->dimension = args;
-            this->vector = new Type[this->dimension];
-            va_list argsList;
-            va_start(argsList, args);
-
-            for (int i = 0; i < this->dimension; ++i) {
-                this->vector[i] = va_arg(argsList, Type);
-            }
-            va_end(argsList);
-        }
-
-        VectorRn(const VectorRn<int>& w) {
+        VectorRn(const VectorRn& w) {
             this->dimension = w.dimension;
-            this->vector = new Type[this->dimension];
+            this->vector = new double[this->dimension];
 
             for (int i = 0; i < this->dimension; i++) {
                 this->vector[i] = w.vector[i];
             }
         }
 
-        VectorRn(const VectorRn<double>& w) {
-            this->dimension = w.dimension;
-            this->vector = new Type[this->dimension];
+        VectorRn(double* array, int dimension) {
+            if (!start) {
+                this->dimension = dimension;
+                this->vector = new double[dimension];
 
-            for (int i = 0; i < this->dimension; i++) {
-                this->vector[i] = w.vector[i];
+                for (int i = 0; i < dimension; i++) {
+                    this->vector[i] = array[i];
+                }
+                this->start = true;
+            }else {
+                std::runtime_error("This object already has been declarated");
             }
         }
 
-        VectorRn(Type* array, int dimension) {
+        VectorRn(int* array, int dimension) {
             this->dimension = dimension;
-            this->vector = new Type[dimension];
+            this->vector = new double[dimension];
 
             for (int i = 0; i < dimension; i++) {
-                this->vector[i] = array[i];
+                double x = array[i];
+                this->vector[i] = x;
+            }
+        }
+        VectorRn(float* array, int dimension) {
+            this->dimension = dimension;
+            this->vector = new double[dimension];
+
+            for (int i = 0; i < dimension; i++) {
+                double x = array[i];
+                this->vector[i] = x;
             }
         }
 
@@ -59,22 +57,21 @@ class VectorRn  {
             return this->dimension;
         }
 
-        Type* getVector() {
+        double* getVector() {
             return this->vector;
         }
 
-        template <typename U>
-        VectorRn<double> operator+(VectorRn<U> w) {
+        VectorRn operator+(VectorRn w) {
             int q = w.getDimension();
             if (this->dimension == q) {
-                U* vectorW = w.getVector();
+                double* vectorW = w.getVector();
                 double* z = new double[q];
                 for (int i = 0; i < q; i++) {
                     double indexV1 = this->vector[i];
                     double indexV2 = vectorW[i];
                     z[i] = indexV1 + indexV2;
                 }
-                VectorRn<double> toReturn(z, q);
+                VectorRn toReturn(z, q);
                 delete[] vectorW, z;
                 return toReturn;
             }else {
@@ -84,11 +81,10 @@ class VectorRn  {
         }
 
         // the product point
-        template <typename U>
-        double operator*(VectorRn<U> w) {
+        double operator*(VectorRn w) {
             int q = w.getDimension();
             if (this->dimension == q) {
-                U* vectorW = w.getVector();
+                double* vectorW = w.getVector();
                 double z = 0;
                 for (int i = 0; i < q; i++) {
                     double indexV1 = this->vector[i];
@@ -103,41 +99,36 @@ class VectorRn  {
             }
         }
 
-        friend VectorRn<double> operator*(double scalar, const VectorRn<Type>& v) {
+        friend VectorRn operator*(double scalar, const VectorRn& v) {
             double* result = new double[v.dimension];
             for (int i = 0; i < v.dimension; ++i) {
                 double w = v.vector[i];
                 result[i] = scalar * w;
             }
-            VectorRn<double> toReturn(result, v.dimension);
+            VectorRn toReturn(result, v.dimension);
             delete[] result;
             return toReturn;
         }
-        friend VectorRn<double> operator*(const VectorRn<Type>& v, double scalar) {
-            double* result = new double[v.dimension];
-            for (int i = 0; i < v.dimension; ++i) {
-                double w = v.vector[i];
-                result[i] = scalar * w;
-            }
-            VectorRn<double> toReturn(result, v.dimension);
-            delete[] result;
-            return toReturn;
+        friend VectorRn operator*(const VectorRn& v, double scalar) {
+            return scalar * v;
         }
 
-        friend VectorRn<double> operator%(const VectorRn<Type>& v, const VectorRn<Type>& w) {
+        friend VectorRn operator%(const VectorRn& v, const VectorRn& w) {
             if (v.dimension == w.dimension && v.dimension == 3) {
-                VectorRn i(3, 1, 0, 0);
-                VectorRn j(3, 0, 1, 0);
-                VectorRn z(3, 0, 0, 1);
-                return i*(v.vector[1]*w.vector[2] - v.vector[2]*w.vector[1]) + -1*j*(v.vector[0]*w.vector[2] - v.vector[2]*w.vector[0]) + z*(v.vector[0]*w.vector[1] - v.vector[1]*w.vector[0]);
+                double result[3] = {
+                    v.vector[1] * w.vector[2] - v.vector[2] * w.vector[1],
+                    v.vector[2] * w.vector[0] - v.vector[0] * w.vector[2],
+                    v.vector[0] * w.vector[1] - v.vector[1] * w.vector[0]
+                };
+                return VectorRn(result, 3);
             }else {
                 std::cout<< "Not match dimensions";
                 std::exit(1);
             }
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const VectorRn<Type>& vecto) {
-            os << '(';
+        friend std::ostream& operator<<(std::ostream& os, const VectorRn& vecto) {
+            os << '[';
 
             for (int i = 0; i < vecto.dimension; ++i) {
             os << vecto.vector[i];
@@ -145,7 +136,8 @@ class VectorRn  {
                 os << ", ";
             }
         }
-            os << ')';
+            os << ']';
+            os << "\n";
             return os;
         }
 };

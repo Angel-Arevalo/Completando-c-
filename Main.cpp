@@ -1,11 +1,12 @@
 #include <iostream>
 #include "String.cpp"
-#include "VectorRn.cpp"
+#include "Matrix.cpp"
 
 int main()
 {
-    VectorRn<int> v(3, 1, 0, 0);
-    VectorRn<int> w(3, 0, 1, 0);
-    std::cout << (v % w);
+    Matrix w(5);
+    std::cout << w;
+    w.setMatrixIdenty(3, 76);
+    std::cout << w;
     return 0;
 }
