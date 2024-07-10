@@ -53,6 +53,15 @@ class VectorRn  {
             }
         }
 
+        void setVectorRn(const VectorRn& w) {
+            this->dimension = w.dimension;
+            this->vector = new double[this->dimension];
+
+            for (int i = 0; i < this->dimension; i++) {
+                this->vector[i] = w.vector[i];
+            }
+        }
+
         int getDimension() {
             return this->dimension;
         }
@@ -99,6 +108,10 @@ class VectorRn  {
             }
         }
 
+        void operator=(const VectorRn& w) {
+            this->setVectorRn(w);
+        }
+
         friend VectorRn operator*(double scalar, const VectorRn& v) {
             double* result = new double[v.dimension];
             for (int i = 0; i < v.dimension; ++i) {
@@ -133,7 +146,7 @@ class VectorRn  {
             for (int i = 0; i < vecto.dimension; ++i) {
             os << vecto.vector[i];
             if (i < vecto.dimension - 1) {
-                os << ", ";
+                os << ' ';
             }
         }
             os << ']';

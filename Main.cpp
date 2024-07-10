@@ -4,9 +4,11 @@
 
 int main()
 {
-    Matrix w(5);
-    std::cout << w;
-    w.setMatrixIdenty(3, 76);
-    std::cout << w;
+    Matrix w;
+    Matrix z;
+    w.setMatrixIdenty(4, 5);
+    z.setMatrixIdenty(4, -5);
+    std::cout << w << z << std::endl;
+    std::cout << (w + z);
     return 0;
 }
