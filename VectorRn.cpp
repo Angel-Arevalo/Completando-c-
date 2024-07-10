@@ -112,6 +112,10 @@ class VectorRn  {
             this->setVectorRn(w);
         }
 
+        double operator[](int x) {
+            return this->vector[x%this->dimension];
+        }
+
         friend VectorRn operator*(double scalar, const VectorRn& v) {
             double* result = new double[v.dimension];
             for (int i = 0; i < v.dimension; ++i) {

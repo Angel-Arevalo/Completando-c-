@@ -6,9 +6,11 @@ int main()
 {
     Matrix w;
     Matrix z;
-    w.setMatrixIdenty(4, 5);
-    z.setMatrixIdenty(4, -5);
-    std::cout << w << z << std::endl;
-    std::cout << (w + z);
+    w.setRandmatrix(4, 2);
+    z.setRandmatrix(2, 5);
+    std::cout << w;
+    std::cout << z;
+    z = z * w;
+    std::cout << z;
     return 0;
 }
