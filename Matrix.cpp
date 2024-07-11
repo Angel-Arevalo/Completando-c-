@@ -8,19 +8,17 @@ class Matrix {
     private:
         VectorRn* cMatrix;
         int rows, columns;
+        double determinant;
 
         void freeMemory() {
             delete[] cMatrix;
         }
 
-    public:
-        Matrix() : cMatrix(nullptr), rows(0), columns(0) {}
-
         static double getDeterminant(const Matrix& w) {
-            if (w.rows == 1) {
-                return w.cMatrix[0][0];
-            }else if (w.rows == w.columns && w.rows != 0) {
-                if (w.rows == 2) {
+            if (w.rows == w.columns && w.rows != 0) {
+                if (w.rows == 1) {
+                    return w.cMatrix[0][0];
+                }if (w.rows == 2) {
                     return w.cMatrix[0][0] * w.cMatrix[1][1] - w.cMatrix[0][1] * w.cMatrix[1][0];
                 }else {
                     double toReturn = 0;
@@ -47,8 +45,91 @@ class Matrix {
                     }
                     return toReturn;
                 }
-            }else throw std::invalid_argument("Is't a square matrix");
+            }else throw std::invalid_argument("Invalid matrix.");
         }
+
+    public:
+        Matrix() : cMatrix(nullptr), rows(0), columns(0) {}
+
+        static Matrix getMatrixInv(const Matrix& w) {
+            if (w.rows != w.columns || w.rows == 0 || w.determinant == 0) {
+                throw std::invalid_argument("Invalid matrix.");
+            }
+
+            Matrix wInv;
+            wInv.rows = w.rows;
+            wInv.columns = w.rows;
+            wInv.determinant = 1./w.determinant;
+
+            if (w.rows == w.columns && w.rows == 1) {
+                wInv.cMatrix = new VectorRn[1];
+                double row[] = {1./(w.cMatrix[0][0])};// this array is used to can create the VectorRn object
+                wInv.cMatrix[0] = VectorRn(row, 1);
+                delete[] row;
+                return wInv;
+            }
+
+            for (int i = 0; i < w.rows; i++) {// to travel around the rows of the matrix
+                double* cofactorRow = new double[w.rows];
+                for (int j = 0; j < w.rows; j++) {
+                    Matrix Minor;
+                    Minor.rows = w.rows - 1;
+                    Minor.columns = w.rows - 1;
+                    Minor.cMatrix = new VectorRn[Minor.rows];
+                    int dom = 0;
+                    for (int k = 0; k < w.rows; k++) {
+                        if (k != i) {
+                            double* rowMinor = new double[Minor.rows];
+                            int counter = 0;
+                            for (int l = 0; l < w.rows; l++) {
+                                if (l != j) {
+                                    rowMinor[counter++] = w.cMatrix[k][l];
+                                }
+                            }
+                            Minor.cMatrix[dom++] = VectorRn(rowMinor, Minor.rows);
+                            delete[] rowMinor;
+                        }
+                    }
+                    double s = ((i + j)% 2 == 0)? 1. : -1.;
+                    cofactorRow[j] = s * Matrix::getDeterminant(Minor);
+                    std::cout << Minor;
+                }
+                //wInv.cMatrix[i] = VectorRn(cofactorRow, w.rows);
+                //delete[] cofactorRow;
+            }
+
+            return wInv;
+        }
+        /*
+        double* cofactorRow = new double[w.rows];
+                for (int j = 0; j < wInv.rows; j++) {// to travel around the columns of the matrix
+                    Matrix Minor;
+                    Minor.rows = w.rows - 1;
+                    Minor.columns = wInv.rows - 1;
+                    Minor.cMatrix = new VectorRn[Minor.rows];
+
+                    int rowIn = 0;
+                    for (int k = 0; k < w.rows; k++) {
+                        if (k != i) {
+                            double* row = new double[wInv.rows - 1];
+                            int counter = 0;
+                            for (int e = 0; e < w.rows; e++) {
+                            // k count the rows of the minor and e count the columns of the minor
+                                if (e != j) row[counter++] = w.cMatrix[k][e];
+                            }
+                            Minor.cMatrix[rowIn++] = VectorRn(row, wInv.rows - 1);
+                            delete[] row;
+                        }
+                    }
+                    double s = ((i + j)% 2 == 0)? 1: -1;
+                    std::cout << Minor;
+                    cofactorRow[j] = s * Matrix::getDeterminant(Minor);
+                    std::cout << cofactorRow[j] << "\n\n";
+                    Minor.freeMemory();
+                }
+                wInv.cMatrix[i] = VectorRn(cofactorRow, w.rows);
+                delete[] cofactorRow;
+        */
 
         void setMatrix(const Matrix& w) {
             *this = w;
@@ -72,6 +153,7 @@ class Matrix {
                 cMatrix[i] = VectorRn(ColumnRow, this->columns);
                 delete[] ColumnRow;
             }
+            this->determinant = Matrix::getDeterminant(*this);
         }
 
         void readEntriesCin(int rows, int columns) {
@@ -89,6 +171,7 @@ class Matrix {
                 cMatrix[i] = VectorRn(ColumnRow, this->columns);
                 delete[] ColumnRow;
             }
+            this->determinant = Matrix::getDeterminant(*this);
         }
 
         void setRandmatrix(int rows, int columns) {
@@ -106,6 +189,7 @@ class Matrix {
                 cMatrix[i] = VectorRn(ColumnRow, this->columns);
                 delete[] ColumnRow;
             }
+            this->determinant = Matrix::getDeterminant(*this);
         }
         void setRandmatrix(int rows) {
             this->setRandmatrix(rows, rows);
@@ -116,6 +200,7 @@ class Matrix {
             w.setColumns(this->rows);
             w.setRows(this->columns);
             w.cMatrix = new VectorRn[this->columns];
+            w.determinant = this->determinant;
             for (int i = 0; i < this->columns; i++) {
                 double* arrayHelper = new double[this->rows];
                 for (int j = 0; j < this->rows; j++) {
@@ -141,6 +226,10 @@ class Matrix {
 
         void setColumns(int x) {
             this->columns = x;
+        }
+
+        double getdeterminant() {
+            return this->determinant;
         }
         // override the operators
 
@@ -212,7 +301,7 @@ class Matrix {
                 }
 
                 return toReturn;
-            }else {throw std::invalid_argument("Don't match the columns and the rows.");}
+            }else throw std::invalid_argument("Don't match the columns and the rows.");
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {

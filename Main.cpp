@@ -4,11 +4,10 @@
 
 int main()
 {
-    Matrix w;
     Matrix z;
-    w.setRandmatrix(7);
-    std::cout << w;
-    double f = Matrix::getDeterminant(w);
-    std::cout << f;
+    z.setRandmatrix(4);
+    std::cout << z;
+    Matrix::getMatrixInv(z);
+
     return 0;
 }
