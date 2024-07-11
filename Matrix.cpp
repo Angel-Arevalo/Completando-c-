@@ -12,18 +12,46 @@ class Matrix {
         void freeMemory() {
             delete[] cMatrix;
         }
+
     public:
         Matrix() : cMatrix(nullptr), rows(0), columns(0) {}
 
-        void setMatrix(const Matrix& w) {
-            this->freeMemory();
-            this->rows = w.rows;
-            this->columns = w.columns;
+        static double getDeterminant(const Matrix& w) {
+            if (w.rows == 1) {
+                return w.cMatrix[0][0];
+            }else if (w.rows == w.columns && w.rows != 0) {
+                if (w.rows == 2) {
+                    return w.cMatrix[0][0] * w.cMatrix[1][1] - w.cMatrix[0][1] * w.cMatrix[1][0];
+                }else {
+                    double toReturn = 0;
+                     for (int k = 0; k < w.rows; k++) {
+                        Matrix Minnor;
+                        Minnor.rows = w.rows - 1;
+                        Minnor.columns = w.columns - 1;
+                        Minnor.cMatrix = new VectorRn[w.rows - 1];
 
-            this->cMatrix = new VectorRn[this->rows];
-            for (int i = 0; i < this->rows; i++) {
-                this->cMatrix[i] = w.cMatrix[i];
-            }
+                        for (int i = 1; i < w.rows; i++) {
+                            double* rows = new double[w.rows - 1];
+                            int counter = 0;
+                            for (int j = 0; j < w.rows; j++) {
+                                if( k != j) {
+                                    rows[counter++] = w.cMatrix[i][j];
+                                }
+                            }
+                            Minnor.cMatrix[i - 1] = VectorRn(rows, w.rows - 1);
+                            delete[] rows;
+                        }
+                        double s = (k % 2 == 0)? 1 : -1;
+                        toReturn += w.cMatrix[0][k] * s * Matrix::getDeterminant(Minnor);
+                        Minnor.freeMemory();
+                    }
+                    return toReturn;
+                }
+            }else throw std::invalid_argument("Is't a square matrix");
+        }
+
+        void setMatrix(const Matrix& w) {
+            *this = w;
         }
 
         void setMatrixIdenty(int rows) {
@@ -163,24 +191,28 @@ class Matrix {
             return z * w;
         }
 
-        friend Matrix operator*(const Matrix& w, Matrix z) {
+        friend Matrix operator*(const Matrix& w,const Matrix& z) {
             if (w.columns == z.rows) {
-                Matrix toReturn/*, zInv;
-                zInv = z.getMatrixtranspose();*/;
+                Matrix toReturn;
                 toReturn.rows = w.rows;
                 toReturn.columns = z.columns;
+                toReturn.cMatrix = new VectorRn[w.rows];
 
                 for (int i = 0; i < w.rows; i++) {// this go around of the rows of the matrix w
+                    double* row = new double[z.columns];
                     for (int k = 0; k < z.columns; k++) {// this go around of the columns of the matrix z
                         double result = 0;
                         for (int j = 0; j < z.rows; j++) {
-                             result += w.cMatrix[i][j] * z.cMatrix[k][j]
+                             result += w.cMatrix[i][j] * z.cMatrix[j][k];
                         }
+                        row[k] = result;
                     }
+                    toReturn.cMatrix[i] = VectorRn(row, z.columns);
+                    delete[] row;
                 }
 
                 return toReturn;
-            }else {std::invalid_argument("Don't match the columns and the rows");}
+            }else {throw std::invalid_argument("Don't match the columns and the rows.");}
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {

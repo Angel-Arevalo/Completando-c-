@@ -145,7 +145,7 @@ class VectorRn  {
         }
 
         friend std::ostream& operator<<(std::ostream& os, const VectorRn& vecto) {
-            os << '[';
+            //os << '[';
 
             for (int i = 0; i < vecto.dimension; ++i) {
             os << vecto.vector[i];
@@ -153,7 +153,7 @@ class VectorRn  {
                 os << ' ';
             }
         }
-            os << ']';
+            //os << ']';
             os << "\n";
             return os;
         }
