@@ -5,9 +5,11 @@
 int main()
 {
     Matrix z;
-    z.setRandmatrix(4);
+    Matrix::readEntriesCin(z);
     std::cout << z;
-    Matrix::getMatrixInv(z);
+    Matrix w = Matrix::getMatrixInv(z);
+    std::cout << w;
+    std::cout << w*z;
 
     return 0;
 }
