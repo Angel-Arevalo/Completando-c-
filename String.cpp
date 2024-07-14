@@ -94,6 +94,7 @@ class String {
         }
 	public:
 	    // the constructor of the class
+	    String() : cString(nullptr), length(0) {}
 		String(const char* string) {
 			this->length = String::lenString(string);
             this->cString = new char[this->length + 1];
