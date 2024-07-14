@@ -1,15 +1,15 @@
 #include <iostream>
 #include "String.cpp"
-#include "Matrix.cpp"
+#include "List.cpp"
 
 int main()
 {
-    Matrix z;
-    Matrix::readEntriesCin(z);
-    std::cout << z;
-    Matrix w = Matrix::getMatrixInv(z);
-    std::cout << w;
-    std::cout << w*z;
+    List<int> x;
+
+    for (int i = 0; i < 10; i++) x.add(i);
+    x.add(0);
+
+    std::cout << x;
 
     return 0;
 }
